@@ -4,6 +4,44 @@ const JsSIP = require('../');
 
 module.exports = {
 
+  'RTCSession preserves early mute until media is ready' : function(test)
+  {
+    const RTCSession = require('../lib/RTCSession');
+
+    for (const muted of [ true, false ])
+    {
+      const session = new RTCSession({ configuration: { session_timers: false } });
+      const audio = { enabled: true };
+      const video = { enabled: true };
+
+      session.mute({ audio: true, video: true });
+      if (!muted)
+      {
+        session.unmute({ audio: true, video: true });
+      }
+
+      session._connection = {
+        signalingState  : 'stable',
+        getLocalStreams : () => [ {
+          getAudioTracks : () => [ audio ],
+          getVideoTracks : () => [ video ]
+        } ]
+      };
+      session.on('connecting', () =>
+      {
+        test.strictEqual(audio.enabled, !muted);
+        test.strictEqual(video.enabled, !muted);
+      });
+      session._connecting({});
+
+      session._connection = { signalingState: 'closed' };
+      session.unmute({ audio: true, video: true });
+      session.mute({ audio: true, video: true });
+    }
+
+    test.done();
+  },
+
   'new URI' : function(test)
   {
     const uri = new JsSIP.URI(null, 'alice', 'jssip.net', 6060);
