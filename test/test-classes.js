@@ -34,6 +34,14 @@ module.exports = {
       });
       session._connecting({});
 
+      // Unmute must never transiently enable a remotely held track.
+      session._remoteHold = true;
+      session.mute({ audio: true, video: true });
+      Object.defineProperty(audio, 'enabled', {
+        set: (enabled) => test.strictEqual(enabled, false)
+      });
+      session.unmute({ audio: true, video: true });
+
       session._connection = { signalingState: 'closed' };
       session.unmute({ audio: true, video: true });
       session.mute({ audio: true, video: true });
