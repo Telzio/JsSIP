@@ -38,7 +38,7 @@ module.exports = {
       session._remoteHold = true;
       session.mute({ audio: true, video: true });
       Object.defineProperty(audio, 'enabled', {
-        set: (enabled) => test.strictEqual(enabled, false)
+        set : (enabled) => test.strictEqual(enabled, false)
       });
       session.unmute({ audio: true, video: true });
 
